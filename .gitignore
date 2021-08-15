@@ -1,0 +1,8 @@
+# Node artifact files
+node_modules/
+npm-debug.log
+
+
+# Local development
+.DS_Store
+package-lock.json
