@@ -107,7 +107,7 @@ jobs:
                   "type": "risky"
                   }, 
               "summary": "Update to Contrail configuration for CAP to reduce network processing overhead", 
-              "end": 18797234, 
-              "start": 19797234, 
+              "end": 1754479894, 
+              "start": 1754393494, 
               "status": "In Progress" 
               }'        
