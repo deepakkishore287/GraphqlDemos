@@ -1,0 +1,107 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy Node.js project to Azure Function App - 229BigPandaTestApp
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
+  NODE_VERSION: '22.x' # set this to the node version to use (supports 8.x, 10.x, 12.x)
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read #This is required for actions/checkout
+      
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@v4
+
+      - name: Setup Node ${{ env.NODE_VERSION }} Environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 'Resolve Project Dependencies Using Npm'
+        shell: pwsh
+        run: |
+          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          npm install
+          npm run build --if-present
+          npm run test --if-present
+          popd
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-app
+          path: .
+
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    permissions:
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: node-app
+      
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.__clientidsecretname__ }}
+          tenant-id: ${{ secrets.__tenantidsecretname__ }}
+          subscription-id: ${{ secrets.__subscriptionidsecretname__ }}
+
+      - name: 'Run Azure Functions Action'
+        uses: Azure/functions-action@v1
+        id: fa
+        with:
+          app-name: '229BigPandaTestApp'
+          slot-name: 'Production'
+          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          
+      - name: Send alert to BigPanda
+        env:
+          BIGPANDA_API_KEY: ${{ secrets.BIGPANDA_API_KEY }}
+          BIGPANDA_BEARER_TOKEN: ${{ secrets.BIGPANDA_BEARER_TOKEN }}
+          JOB_STATUS: ${{ needs.build.result }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          BRANCH: ${{ github.ref }}
+          SHA: ${{ github.sha }}
+        run: |
+          echo "Sending alert to BigPanda with status: $JOB_STATUS"
+          curl -X POST https://api.bigpanda.io/data/v2/alerts \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $BIGPANDA_BEARER_TOKEN" \
+            -d '{
+              "app_key": "'"$BIGPANDA_API_KEY"'",
+              "host": "github-actions",
+              "check": "CI/CD Pipeline Status",
+              "status": "'"$JOB_STATUS"'",
+              "title": "Github CI/CD",
+              "impacted_service": "TestGithub",
+              "environment": "PPE",
+              "priority": "P4",
+              "description": "Testing",
+              "impacted_ci": "TestGithub",
+              "queue": "229_Zendesk_testing_group",
+              "timestamp": '"$(date +%s)"',
+              "tags": {
+                "repo": "'"$REPO"'",
+                "branch": "'"$BRANCH"'",
+                "commit": "'"$SHA"'",
+                "run_url": "https://github.com/'"$REPO"'/actions/runs/'"$RUN_ID"'"
+              }
+            }'   
