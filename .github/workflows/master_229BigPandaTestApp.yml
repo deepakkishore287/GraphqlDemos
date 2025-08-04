@@ -90,23 +90,24 @@ jobs:
           curl -X POST https://api.bigpanda.io/data/v2/alerts \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $BIGPANDA_BEARER_TOKEN" \
+            -H "x-bp-app-key: $BIGPANDA_API_KEY" \
             -d '{
-              "app_key": "'"$BIGPANDA_API_KEY"'",
               "host": "github-actions",
               "check": "CI/CD Pipeline Status",
-              "status": "'"$JOB_STATUS"'",
               "title": "Github CI/CD",
               "impacted_service": "TestGithub",
               "environment": "PPE",
               "priority": "P4",
               "description": "Testing",
               "impacted_ci": "TestGithub",
-              "queue": "229_Zendesk_testing_group",
-              "timestamp": '"$(date +%s)"',
-              "tags": {
-                "repo": "'"$REPO"'",
-                "branch": "'"$BRANCH"'",
-                "commit": "'"$SHA"'",
-                "run_url": "https://github.com/'"$REPO"'/actions/runs/'"$RUN_ID"'"
-              }
-            }'        
+              "identifier": "deepak-1234", 
+              "tags": { 
+                  "sys_id": "system_123", 
+                  "queue": "229_Zendesk_testing_group",
+                  "type": "risky"
+                  }, 
+              "summary": "Update to Contrail configuration for CAP to reduce network processing overhead", 
+              "end": 18797234, 
+              "start": 19797234, 
+              "status": "Failed" 
+              }'        
