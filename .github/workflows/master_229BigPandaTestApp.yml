@@ -70,7 +70,12 @@ jobs:
           app-name: '229BigPandaTestApp'
           slot-name: 'Production'
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          
+
+  notify-bigpanda:
+    if: always()  # ensures it runs whether build succeeds or fails
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Send alert to BigPanda
         env:
           BIGPANDA_API_KEY: ${{ secrets.BIGPANDA_API_KEY }}
@@ -104,4 +109,4 @@ jobs:
                 "commit": "'"$SHA"'",
                 "run_url": "https://github.com/'"$REPO"'/actions/runs/'"$RUN_ID"'"
               }
-            }'   
+            }'        
