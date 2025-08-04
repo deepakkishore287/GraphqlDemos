@@ -92,17 +92,9 @@ jobs:
             -H "Authorization: Bearer $BIGPANDA_BEARER_TOKEN" \
             -H "x-bp-app-key: $BIGPANDA_API_KEY" \
             -d '{
-              "host": "github-actions",
-              "check": "CI/CD Pipeline Status",
-              "title": "Github CI/CD",
-              "impacted_service": "TestGithub",
-              "environment": "PPE",
-              "priority": "P4",
-              "description": "Testing",
-              "impacted_ci": "TestGithub",
-              "identifier": "deepak-1234", 
+              "identifier": "deepak-5678", 
               "tags": { 
-                  "sys_id": "system_123", 
+                  "sys_id": "system_ABCD", 
                   "queue": "229_Zendesk_testing_group",
                   "type": "risky"
                   }, 
