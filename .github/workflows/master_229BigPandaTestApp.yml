@@ -109,5 +109,5 @@ jobs:
               "summary": "Update to Contrail configuration for CAP to reduce network processing overhead", 
               "end": 18797234, 
               "start": 19797234, 
-              "status": "Failed" 
+              "status": "In Progress" 
               }'        
